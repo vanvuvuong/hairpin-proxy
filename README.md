@@ -1,3 +1,10 @@
+This repo is original from [hairpin-proxy](https://github.com/compumike/hairpin-proxy). I am not using the forking feature because I want to make this repo more independent.
+
+# Reasons for forking
+
+- Trying to minimize (or perhap remove) private dependencies
+- Moving all the configuration from Dockerfile to Config Map
+
 # hairpin-proxy
 
 PROXY protocol support for internal-to-LoadBalancer traffic for Kubernetes Ingress users, specifically for cert-manager self-checks.
