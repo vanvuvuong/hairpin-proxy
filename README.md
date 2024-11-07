@@ -2,7 +2,7 @@ This repo is original from [hairpin-proxy](https://github.com/compumike/hairpin-
 
 # Reasons for forking
 
-- Trying to minimize (or perhap remove) private dependencies
+- Trying to minimize (or perhap remove) image dependencies
 - Moving all the configuration from Dockerfile to Config Map
 
 # hairpin-proxy
