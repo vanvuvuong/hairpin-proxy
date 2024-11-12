@@ -4,7 +4,34 @@ metadata:
   name: hairpin-proxy
 
 ---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: haproxy-cfg
+  namespace: hairpin-proxy
+data:
+  value: |
+    defaults
+      timeout client 1800s
+      timeout connect 1800s
+      timeout server 1800s
+    frontend fe_80
+      bind *:80
+      mode http
+      use_backend be_ingress_80
+    backend be_ingress_80
+      mode http
+      server my_server "${TARGET_SERVER}:80"
 
+    frontend fe_443
+      bind *:443
+      mode http
+      use_backend be_ingress_443
+    backend be_ingress_443
+      mode http
+      server my_server "${TARGET_SERVER}:443"
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,9 +59,23 @@ spec:
             limits:
               memory: "200Mi"
               cpu: "50m"
+          env:
+            - name: TARGET_SERVER
+              value: ingress-nginx-controller.ingress-nginx.svc.cluster.local
+          volumeMounts:
+            - mountPath: /usr/local/etc/haproxy/
+              name: haproxy-cfg-cm
+              readOnly: true
+      volumes:
+        - name: haproxy-cfg-cm
+          configMap:
+            defaultMode: 400
+            items:
+              - key: value
+                path: haproxy.cfg
+            name: haproxy-cfg
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -54,7 +95,6 @@ spec:
       targetPort: 443
 
 ---
-
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -62,7 +102,6 @@ metadata:
   namespace: hairpin-proxy
 
 ---
-
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -79,7 +118,6 @@ rules:
       - watch
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -94,7 +132,6 @@ subjects:
     namespace: hairpin-proxy
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -112,7 +149,6 @@ rules:
       - update
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -128,7 +164,6 @@ subjects:
     namespace: hairpin-proxy
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
